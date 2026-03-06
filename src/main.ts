@@ -7,10 +7,22 @@ import './style.css';
 // STATE
 // =====================================================
 type Section = 'visao-geral' | 'produtividade' | 'demanda' | 'rentabilidade' | 'tarefas';
+type Theme = 'light' | 'dark';
 
 let currentSection: Section = 'visao-geral';
 let sidebarOpen = false;
+let currentTheme: Theme = (localStorage.getItem('bi-theme') as Theme) || 'light';
 const chartInstances: Chart[] = [];
+
+// Apply theme immediately on load (before render)
+document.documentElement.setAttribute('data-theme', currentTheme);
+
+function toggleTheme() {
+  currentTheme = currentTheme === 'light' ? 'dark' : 'light';
+  document.documentElement.setAttribute('data-theme', currentTheme);
+  localStorage.setItem('bi-theme', currentTheme);
+  render();
+}
 
 function destroyCharts() {
   chartInstances.forEach(c => c.destroy());
@@ -117,6 +129,9 @@ function renderTopBar(): string {
         </div>
       </div>
       <div class="topbar-right">
+        <button class="theme-toggle-btn" id="theme-toggle" title="${currentTheme === 'light' ? 'Ativar tema escuro' : 'Ativar tema claro'}">
+          ${currentTheme === 'light' ? icon('moon', 18) : icon('sun', 18)}
+        </button>
         <div class="topbar-badge">
           ${icon('calendar', 14)}
           <span>Mar/2026</span>
@@ -916,6 +931,11 @@ function bindEvents() {
     sidebarOpen = !sidebarOpen;
     document.getElementById('sidebar')?.classList.toggle('open', sidebarOpen);
     document.getElementById('sidebar-overlay')?.classList.toggle('active', sidebarOpen);
+  });
+
+  // Theme toggle
+  document.getElementById('theme-toggle')?.addEventListener('click', () => {
+    toggleTheme();
   });
 
   // Overlay click
